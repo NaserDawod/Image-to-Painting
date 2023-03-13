@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Image</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+  <link rel="stylesheet" type="text/css" href= "{{ url_for('static',filename='styles/index.css') }}">
+</head>
+<body>
+    <style>
+        div {
+            text-align: center;
+        }
+        div > div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 70%;
+            margin: 0 auto;
+        }
+    </style>
+    
+    <div>
+        <h1>Monet Painting</h1>
+        <p>Oscar-Claude Monet was a French painter and founder of impressionist painting who is seen as a key precursor to modernism, especially in his attempts to paint nature as he perceived it</p>
+        <p>In this project we traing the Deep Learning model Cycle-Gan to convert a normal Image to a monet Painting</p>
+        <h3>Try it Now by uploading some image and seeing the result</h3>
+        <h2>His Art</h2>
+        <div>
+            <img src="{{ url_for('static',filename='images/img_16.jpg') }}" class="size">
+            <img src="{{ url_for('static',filename='images/img_19.jpg') }}" class="size">
+            <img src="{{ url_for('static',filename='images/img_22.jpg') }}" class="size">
+        </div>
+    </div>
+    <div>
+        <h1>Upload Image</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <label for="image">Select an image to upload:</label>
+            <input type="file" id="image" name="image">
+            <button type="submit">Upload</button>
+        </form>
+        
+        <div class="image-container">
+            <div class="image-wrapper">
+                <img alt="Original Image" id="oreginal-image">
+                <div class="image-title">Original</div>
+            </div>
+            <div class="image-wrapper">
+                <img alt="Painting Image" id="result-image">
+                <div class="image-title">Painting</div>
+            </div>
+        </div>
+
+        <img id="oreginal-image">
+        <img id="result-image">
+
+        <script>
+            const form = document.querySelector("form");
+            const imageInput = document.querySelector('#image');
+            const originalImage = document.querySelector("#oreginal-image");
+            const resultImage = document.querySelector("#result-image");
+            
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                var file = imageInput.files[0];
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    originalImage.src = reader.result;
+                };
+                
+                const formData = new FormData(form);
+
+                const response = await fetch("/upload", {
+                    method: "POST",
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const resultBlob = await response.blob();
+                    resultImage.src = URL.createObjectURL(resultBlob);
+                } else {
+                    console.error("Error uploading image");
+                }
+
+                var imageContainer = document.querySelector('.image-container');
+                imageContainer.style.display = 'block';
+            });
+        </script>
+    </div>    
+</body>
+</html>
